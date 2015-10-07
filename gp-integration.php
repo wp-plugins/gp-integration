@@ -6,6 +6,8 @@ Description: A fully integrated version of GlotPress for WordPress.
 Version: 1.0
 Author: Greg Ross
 Author URI: http://toolstack.com
+Text Domain: gp-integration
+Domain Path: /languages/
 License: GPL2
 */
 
@@ -14,13 +16,15 @@ License: GPL2
 	define('GP_INTEGRATON_REQUIRED_PHP_VERSION', '5.0' );
 
 	include_once( 'ToolStack-WP-Utilities.class.php' );
-	include_once( 'gpi-settings.php' );
+	include_once( 'includes/gpi-settings.php' );
 
+	GLOBAL $gpi_utils;
+	
 	// Create out global utilities object.  We might be tempted to load the user options now, but that's not possible as WordPress hasn't processed the login this early yet.
-	$gpi_utils = new ToolStack_WP_Utilities_V2_3( 'gp_integration' );
+	$gpi_utils = new ToolStack_WP_Utilities_V2_5( 'gp_integration', __FILE__ );
 
 	function gp_integration_php_after_plugin_row() {
-		echo '<tr><th scope="row" class="check-column"></th><td class="plugin-title" colspan="10"><span style="padding: 3px; color: white; background-color: red; font-weight: bold">&nbsp;&nbsp;' . __('ERROR: GlotPress Integration has detected an unsupported version of PHP, GlotPress Integration will not function without PHP Version ') . GP_INTEGRATON_REQUIRED_PHP_VERSION . __(' or higher!') . '  ' . __('Your current PHP version is') . ' ' . phpversion() . '.&nbsp;&nbsp;</span></td></tr>';
+		echo '<tr><th scope="row" class="check-column"></th><td class="plugin-title" colspan="10"><span style="padding: 3px; color: white; background-color: red; font-weight: bold">&nbsp;&nbsp;' . __('ERROR: GlotPress Integration has detected an unsupported version of PHP, GlotPress Integration will not function without PHP Version ', 'gp-integraiton') . GP_INTEGRATON_REQUIRED_PHP_VERSION . __(' or higher!', 'gp-integraiton') . '  ' . __('Your current PHP version is', 'gp-integraiton') . ' ' . phpversion() . '.&nbsp;&nbsp;</span></td></tr>';
 	}
 	
 	// Check the PHP version, if we don't meet the minimum version to run WP Statistics return so we don't cause a critical error.
@@ -29,6 +33,8 @@ License: GPL2
 		return; 
 	} 
 
+	GLOBAL $wpdb;
+	
 	$gpdb = $wpdb;
 	$gpi_remote_db = false;
 	$gpi_database = $gpi_utils->get_option( 'gp_database_name' );
@@ -43,7 +49,7 @@ License: GPL2
 
 	// Add a settings link to the plugin list.
 	function gp_integration_settings_links( $links, $file ) {
-		array_unshift( $links, '<a href="' . admin_url( 'admin.php?page=gp-integration-settings' ) . '">' . __( 'Settings', 'wp_statistics' ) . '</a>' );
+		array_unshift( $links, '<a href="' . admin_url( 'admin.php?page=gp-integration-settings' ) . '">' . __( 'Settings', 'gp-integraiton' ) . '</a>' );
 		
 		return $links;
 	}
@@ -54,10 +60,10 @@ License: GPL2
 		if( $file == plugin_basename(__FILE__) ) {
 			$plugin_url = 'http://wordpress.org/plugins/gp-integration/';
 			
-			$links[] = '<a href="'. $plugin_url .'" target="_blank" title="'. __('Click here to visit the plugin on WordPress.org', 'wp_statistics') .'">'. __('Visit WordPress.org page', 'wp_statistics') .'</a>';
+			$links[] = '<a href="'. $plugin_url .'" target="_blank" title="'. __('Click here to visit the plugin on WordPress.org', 'gp-integraiton') .'">'. __('Visit WordPress.org page', 'gp-integraiton') .'</a>';
 			
 			$rate_url = 'http://wordpress.org/support/view/plugin-reviews/gp-integration?rate=5#postform';
-			$links[] = '<a href="'. $rate_url .'" target="_blank" title="'. __('Click here to rate and review this plugin on WordPress.org', 'wp_statistics') .'">'. __('Rate this plugin', 'wp_statistics') .'</a>';
+			$links[] = '<a href="'. $rate_url .'" target="_blank" title="'. __('Click here to rate and review this plugin on WordPress.org', 'gp-integraiton') .'">'. __('Rate this plugin', 'gp-integraiton') .'</a>';
 		}
 		
 		return $links;
@@ -69,20 +75,30 @@ License: GPL2
 		GLOBAL $gpi_remote_db;
 		
 		// Add the top level menu.
-		add_menu_page(__('GlotPress'), __('GlotPress'), 'read', __FILE__, 'gp_integration_main_page');
+		add_menu_page(__('GlotPress', 'gp-integraiton'), __('GlotPress', 'gp-integraiton'), 'read', __FILE__, 'gp_integration_main_page');
 
 		// Add the sub items.
-		add_submenu_page(__FILE__, __('Project Management'), __('Project Management'), 'manage_options', 'gpi_projects', 'gp_integration_projects_page');
-		add_submenu_page(__FILE__, __('Translation Set Management'), __('Translation Set Management'), 'manage_options', 'gpi_translation_sets', 'gp_integration_translation_sets_page');
+		add_submenu_page(__FILE__, __('Project Management', 'gp-integraiton'), __('Project Management', 'gp-integraiton'), 'manage_options', 'gpi_projects', 'gp_integration_projects_page');
+		add_submenu_page(__FILE__, __('Translation Set Management', 'gp-integraiton'), __('Translation Set Management', 'gp-integraiton'), 'manage_options', 'gpi_translation_sets', 'gp_integration_translation_sets_page');
 		if( $gpi_remote_db ) {
-			add_submenu_page(__FILE__, __('Users'), __('Users'), 'manage_options', 'gpi_users', 'gp_integration_users_page');
+			add_submenu_page(__FILE__, __('Users', 'gp-integraiton'), __('Users', 'gp-integraiton'), 'manage_options', 'gpi_users', 'gp_integration_users_page');
 		}
-		add_submenu_page(__FILE__, __('Admin Users'), __('Admin Users'), 'manage_options', 'gpi_admin_users', 'gp_integration_admin_users_page');
-		add_submenu_page(__FILE__, __('Settings'), __('Settings'), 'manage_options', 'gpi_settings', 'gp_integration_admin_page');
+		add_submenu_page(__FILE__, __('Admin Users', 'gp-integraiton'), __('Admin Users', 'gp-integraiton'), 'manage_options', 'gpi_admin_users', 'gp_integration_admin_users_page');
+		add_submenu_page(__FILE__, __('Settings', 'gp-integraiton'), __('Settings', 'gp-integraiton'), 'manage_options', 'gpi_settings', 'gp_integration_admin_page');
 		
 	}
 	add_action('admin_menu', 'gp_integration_menu');
 
+	// Load the translation code.
+	function gp_integration_language() {
+		load_plugin_textdomain('gp-integraiton', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
+		__('GP Integration', 'gp-integraiton');
+		__('A fully integrated version of GlotPress for WordPress.', 'gp-integraiton');
+	}
+
+	// Add translation action.
+	add_action('plugins_loaded', 'gp_integration_language');
+	
 	function gp_integration_main_page() {
 		echo gp_integration_shortcode(null);
 	}
@@ -115,6 +131,20 @@ License: GPL2
 		return $gp_path;
 	}
 
+	function gp_integration_get_gp_dir() {
+		GLOBAL $gpi_utils;
+
+		$gp_dir = $gpi_utils->get_option('gp_dir');
+
+		// if the dir hasn't been defined yet, set it to the default and save it.
+		if( $gp_dir == '' ) { 
+			$gp_dir = ABSPATH . 'gp'; 
+			$gpi_utils->update_option('gp_dir', $gp_dir );
+		}
+	
+		return $gp_dir;
+	}
+
 	function gp_integration_get_user_list() {
 		GLOBAL $gpdb, $gpi_remote_db, $gpi_utils;
 		
@@ -136,7 +166,7 @@ License: GPL2
 		$is_admin = current_user_can( 'manage_options' );
 
 		if( !$is_admin ) {
-			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!') . '</p></div>';
+			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!', 'gp-integraiton') . '</p></div>';
 			return;
 		}
 
@@ -144,7 +174,7 @@ License: GPL2
 		
 		if( array_key_exists( 'add-admin', $_POST ) ) {
 			if( $_POST['selected-user'] == 'select user' ) {
-				echo '<div class="update-nag"><p>' . __('Please select a user to add!') . '</p></div>';
+				echo '<div class="update-nag"><p>' . __('Please select a user to add!', 'gp-integraiton') . '</p></div>';
 			}
 			else {
 				$sqlstring = $gpdb->prepare( 'INSERT INTO ' . $table_prefix . 'permissions (user_id, action) VALUES ( %d, %s);', $_POST['selected-user'], 'admin' );
@@ -162,7 +192,7 @@ License: GPL2
 							$gpdb->query( $sqlstring );
 						}
 						else {
-							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!') . '</p></div>';
+							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!', 'gp-integraiton') . '</p></div>';
 						}
 						
 					}
@@ -179,7 +209,7 @@ License: GPL2
 		
 		echo '<div class="wrap">' . "<br>";
 		echo '	' . screen_icon('options-general') . "\n";
-		echo '	<h2>' . __('Admin Users Management') . '</h2>' . "\n";
+		echo '	<h2>' . __('Admin Users Management', 'gp-integraiton') . '</h2>' . "\n";
 		echo '	<br>' . "\n";
 
 		gp_integration_confirm_delete_javascript();
@@ -189,9 +219,9 @@ License: GPL2
 		echo '		<table class="widefat">' . "\n";
 		echo '			<thead>' . "\n";
 		echo '			<tr>';
-		echo '				<th>' . __('User ID') . '</td>' . "\n";
-		echo '				<th>' . __('E-Mail') . '</td>' . "\n";
-		echo '				<th>' . __('Action') . '</td>' . "\n";
+		echo '				<th>' . __('User ID', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('E-Mail', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Action', 'gp-integraiton') . '</td>' . "\n";
 		echo '			</tr>' . "\n";
 		echo '			</thead>' . "\n";
 		
@@ -207,7 +237,7 @@ License: GPL2
 			echo '			<tr' . $class . '>' . "\n";
 			echo '				<td>' . esc_html( $user_obj->user_login ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $user_obj->user_email ) . '</td>' . "\n";
-			echo '				<td><input type="submit" name="remove-admin-' . $user_id->user_id .'" value="' . __('Remove') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to remove this users admin privileges?'). '\')"></input></td>' . "\n";
+			echo '				<td><input type="submit" name="remove-admin-' . $user_id->user_id .'" value="' . __('Remove', 'gp-integraiton') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to remove this users admin privileges?', 'gp-integraiton'). '\')"></input></td>' . "\n";
 			echo '			</tr>' . "\n";
 		}
 		
@@ -216,7 +246,7 @@ License: GPL2
 		echo '				<td>';
 
 		echo '<select name="selected-user">';
-		echo '<option value="select user" SELECTED> ' . __('Select user') . '</option>';
+		echo '<option value="select user" SELECTED> ' . __('Select user', 'gp-integraiton') . '</option>';
 
 		foreach( $users as $user ) {
 
@@ -231,7 +261,7 @@ License: GPL2
 		echo '</td>' . "\n";
 
 		echo '				<td></td>' . "\n";
-		echo '				<td><input type="submit" name="add-admin" value="' . __('Add') . '" class="button-primary"></input></td>' . "\n";
+		echo '				<td><input type="submit" name="add-admin" value="' . __('Add', 'gp-integraiton') . '" class="button-primary"></input></td>' . "\n";
 		echo '			</tr>' . "\n";
 
 		echo '			</tbody>' . "\n";
@@ -249,7 +279,7 @@ License: GPL2
 		$is_admin = current_user_can( 'manage_options' );
 
 		if( !$is_admin ) {
-			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!') . '</p></div>';
+			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!', 'gp-integraiton') . '</p></div>';
 			return;
 		}
 
@@ -277,7 +307,7 @@ License: GPL2
 				
 			}
 			else {
-				echo '<div class="update-nag"><p>' . __('Please select a user to add!') . '</p></div>';
+				echo '<div class="update-nag"><p>' . __('Please select a user to add!', 'gp-integraiton') . '</p></div>';
 			}
 		}
 		else {
@@ -294,7 +324,7 @@ License: GPL2
 							$gpdb->query( $sqlstring );
 						}
 						else {
-							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!') . '</p></div>';
+							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!', 'gp-integraiton') . '</p></div>';
 						}
 						
 					}
@@ -314,7 +344,7 @@ License: GPL2
 							}
 						}
 						else {
-							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!') . '</p></div>';
+							echo '<div class="update-nag"><p>' . __('Invalid user selected to remove!', 'gp-integraiton') . '</p></div>';
 						}
 						
 					}
@@ -327,7 +357,7 @@ License: GPL2
 
 		echo '<div class="wrap">' . "<br>";
 		echo '	' . screen_icon('options-general') . "\n";
-		echo '	<h2>' . __('User Management') . '</h2>' . "\n";
+		echo '	<h2>' . __('User Management', 'gp-integraiton') . '</h2>' . "\n";
 		echo '	<br>' . "\n";
 
 		gp_integration_confirm_delete_javascript();
@@ -337,16 +367,16 @@ License: GPL2
 		echo '		<table class="widefat">' . "\n";
 		echo '			<thead>' . "\n";
 		echo '			<tr>';
-		echo '				<th>' . __('ID') . '</td>' . "\n";
-		echo '				<th>' . __('Login Name') . '</td>' . "\n";
-		echo '				<th>' . __('Nice Name') . '</td>' . "\n";
-		echo '				<th>' . __('Display Name') . '</td>' . "\n";
-		echo '				<th>' . __('E-Mail') . '</td>' . "\n";
-		echo '				<th>' . __('URL') . '</td>' . "\n";
-		echo '				<th>' . __('Registration Date') . '</td>' . "\n";
-		echo '				<th>' . __('Status') . '</td>' . "\n";
-		echo '				<th>' . __('Password') . '</td>' . "\n";
-		echo '				<th>' . __('Action') . '</td>' . "\n";
+		echo '				<th>' . __('ID', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Login Name', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Nice Name', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Display Name', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('E-Mail', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('URL', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Registration Date', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Status', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Password', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Action', 'gp-integraiton') . '</td>' . "\n";
 		echo '			</tr>' . "\n";
 		echo '			</thead>' . "\n";
 		
@@ -366,7 +396,7 @@ License: GPL2
 			echo '				<td>' . esc_html( $user_obj->user_registered ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $user_obj->user_status) . '</td>' . "\n";
 			echo '				<td><input type="text" size="10" name="password-' . $user_obj->ID . '"></td>' . "\n";
-			echo '				<td><input type="submit" name="pw-reset-' . $user_obj->ID . '" value="' . __('PW Reset') . '" class="button-primary"></input>&nbsp;&nbsp;<input type="submit" name="delete-user-' . $user_obj->ID .'" value="' . __('Delete') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this user?  This cannot be undone!'). '\')"></input></td>' . "\n";
+			echo '				<td><input type="submit" name="pw-reset-' . $user_obj->ID . '" value="' . __('PW Reset', 'gp-integraiton') . '" class="button-primary"></input>&nbsp;&nbsp;<input type="submit" name="delete-user-' . $user_obj->ID .'" value="' . __('Delete', 'gp-integraiton') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this user?  This cannot be undone!', 'gp-integraiton'). '\')"></input></td>' . "\n";
 			echo '			</tr>' . "\n";
 		}
 		
@@ -380,7 +410,7 @@ License: GPL2
 		echo '				<td></td>' . "\n";
 		echo '				<td></td>' . "\n";
 		echo '				<td><input type="text" size="10" name="add_password"></td>' . "\n";
-		echo '				<td><input type="submit" name="add-user" value="' . __('Add') . '" class="button-primary"></input></td>' . "\n";
+		echo '				<td><input type="submit" name="add-user" value="' . __('Add', 'gp-integraiton') . '" class="button-primary"></input></td>' . "\n";
 		echo '			</tr>' . "\n";
 
 		echo '			</tbody>' . "\n";
@@ -419,7 +449,7 @@ License: GPL2
 		$is_admin = current_user_can( 'manage_options' );
 
 		if( !$is_admin ) {
-			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!') . '</p></div>';
+			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!', 'gp-integraiton') . '</p></div>';
 			return;
 		}
 
@@ -450,10 +480,10 @@ License: GPL2
 							gp_integration_delete_translation_set( $set->id );
 						}
 						
-						echo '<div class="updated"><p>' . __('Project deleted!') . '</p></div>';
+						echo '<div class="updated"><p>' . __('Project deleted!', 'gp-integraiton') . '</p></div>';
 					}
 					else {
-						echo '<div class="update-nag"><p>' . __('Invalid project selected to remove!') . '</p></div>';
+						echo '<div class="update-nag"><p>' . __('Invalid project selected to remove!', 'gp-integraiton') . '</p></div>';
 					}
 					
 				}
@@ -464,7 +494,7 @@ License: GPL2
 		
 		echo '<div class="wrap">' . "<br>";
 		echo '	' . screen_icon('options-general') . "\n";
-		echo '	<h2>' . __('Project Management') . '</h2>' . "\n";
+		echo '	<h2>' . __('Project Management', 'gp-integraiton') . '</h2>' . "\n";
 		echo '	<br>' . "\n";
 
 		gp_integration_confirm_delete_javascript();
@@ -474,15 +504,15 @@ License: GPL2
 		echo '		<table class="widefat">' . "\n";
 		echo '			<thead>' . "\n";
 		echo '			<tr>';
-		echo '				<th>' . __('ID') . '</td>' . "\n";
-		echo '				<th>' . __('Name') . '</td>' . "\n";
-		echo '				<th>' . __('Slug') . '</td>' . "\n";
-		echo '				<th>' . __('Path') . '</td>' . "\n";
-		echo '				<th>' . __('Description') . '</td>' . "\n";
-		echo '				<th>' . __('Parent') . '</td>' . "\n";
-		echo '				<th>' . __('Source URL') . '</td>' . "\n";
-		echo '				<th>' . __('Active') . '</td>' . "\n";
-		echo '				<th>' . __('Action') . '</td>' . "\n";
+		echo '				<th>' . __('ID', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Name', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Slug', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Path', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Description', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Parent', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Source URL', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Active', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Action', 'gp-integraiton') . '</td>' . "\n";
 		echo '			</tr>' . "\n";
 		echo '			</thead>' . "\n";
 		
@@ -501,7 +531,7 @@ License: GPL2
 			echo '				<td>' . esc_html( $project->parent_project_id ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $project->source_url_template ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $project->active ) . '</td>' . "\n";
-			echo '				<td><input type="submit" name="delete-project-' . $project->id .'" value="' . __('Delete') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this project?  This action cannot be undone!'). '\')"></input></td>' . "\n";
+			echo '				<td><input type="submit" name="delete-project-' . $project->id .'" value="' . __('Delete', 'gp-integraiton') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this project?  This action cannot be undone!', 'gp-integraiton'). '\')"></input></td>' . "\n";
 			echo '			</tr>' . "\n";
 		}
 		
@@ -520,7 +550,7 @@ License: GPL2
 		$is_admin = current_user_can( 'manage_options' );
 
 		if( !$is_admin ) {
-			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!') . '</p></div>';
+			echo '<div class="update-nag"><p>' . __('You do not have permissions to this page!', 'gp-integraiton') . '</p></div>';
 			return;
 		}
 
@@ -537,10 +567,10 @@ License: GPL2
 					
 					if( $set_id_to_delete > 0 ) {
 						gp_integration_delete_translation_set( $set_id_to_delete );
-						echo '<div class="updated"><p>' . __('Translation set deleted!') . '</p></div>';
+						echo '<div class="updated"><p>' . __('Translation set deleted!', 'gp-integraiton') . '</p></div>';
 					}
 					else {
-						echo '<div class="update-nag"><p>' . __('Invalid project selected to remove!') . '</p></div>';
+						echo '<div class="update-nag"><p>' . __('Invalid project selected to remove!', 'gp-integraiton') . '</p></div>';
 					}
 					
 				}
@@ -551,7 +581,7 @@ License: GPL2
 		
 		echo '<div class="wrap">' . "<br>";
 		echo '	' . screen_icon('options-general') . "\n";
-		echo '	<h2>' . __('Translation Set Management') . '</h2>' . "\n";
+		echo '	<h2>' . __('Translation Set Management', 'gp-integraiton') . '</h2>' . "\n";
 		echo '	<br>' . "\n";
 
 		gp_integration_confirm_delete_javascript();
@@ -580,9 +610,9 @@ License: GPL2
 		echo '<input type="hidden" value="' . $current_project_id . '" name="current-project-id" />';
 		
 		if( count( $projects ) > 1 ) {
-			echo __('Select Project') . ': <select name="selected-project">';
+			echo __('Select Project', 'gp-integraiton') . ': <select name="selected-project">';
 			if( $current_project_id > 0 ) { $selected = ''; } else { $selected = ' SELECTED'; }
-			echo '<option value="select project" SELECTED> ' . __('Select project') . '</option>';
+			echo '<option value="select project" SELECTED> ' . __('Select project', 'gp-integraiton') . '</option>';
 
 			foreach( $projects as $project ) {
 
@@ -593,7 +623,7 @@ License: GPL2
 			
 			echo '</select>';
 
-			echo '&nbsp;&nbsp;<input type="submit" name="select-project" value="' . __('Select') . '" class="button-primary"></input>' . "\n";
+			echo '&nbsp;&nbsp;<input type="submit" name="select-project" value="' . __('Select', 'gp-integraiton') . '" class="button-primary"></input>' . "\n";
 			echo '<br><br>' . "\n";
 		}
 		
@@ -602,11 +632,11 @@ License: GPL2
 		echo '		<table class="widefat">' . "\n";
 		echo '			<thead>' . "\n";
 		echo '			<tr>';
-		echo '				<th>' . __('ID') . '</td>' . "\n";
-		echo '				<th>' . __('Name') . '</td>' . "\n";
-		echo '				<th>' . __('Slug') . '</td>' . "\n";
-		echo '				<th>' . __('Locale') . '</td>' . "\n";
-		echo '				<th>' . __('Action') . '</td>' . "\n";
+		echo '				<th>' . __('ID', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Name', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Slug', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Locale', 'gp-integraiton') . '</td>' . "\n";
+		echo '				<th>' . __('Action', 'gp-integraiton') . '</td>' . "\n";
 		echo '			</tr>' . "\n";
 		echo '			</thead>' . "\n";
 		
@@ -621,7 +651,7 @@ License: GPL2
 			echo '				<td>' . esc_html( $set->name ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $set->slug ) . '</td>' . "\n";
 			echo '				<td>' . esc_html( $set->locale ) . '</td>' . "\n";
-			echo '				<td><input type="submit" name="delete-translation-set-' . $set->id .'" value="' . __('Delete') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this translation set?  This action cannot be undone!'). '\')"></input></td>' . "\n";
+			echo '				<td><input type="submit" name="delete-translation-set-' . $set->id .'" value="' . __('Delete', 'gp-integraiton') . '" class="button-primary" onclick="return GPIntegrationConfirmAction(\'' . __('Are you sure you wish to delete this translation set?  This action cannot be undone!', 'gp-integraiton'). '\')"></input></td>' . "\n";
 			echo '			</tr>' . "\n";
 		}
 		
@@ -637,7 +667,7 @@ License: GPL2
 	// This function adds the menu icon to the top level menu.  WordPress 3.8 changed the style of the menu a bit and so a different css file is loaded.
 	function gp_integration_menu_icon() {
 	
-		wp_enqueue_style('gpintegration-admin-css', plugin_dir_url(__FILE__) . 'admin.css', true, '1.0');
+		wp_enqueue_style('gpintegration-admin-css', plugin_dir_url(__FILE__) . 'css/admin.css', true, '1.0');
 	}
 	add_action('admin_head', 'gp_integration_menu_icon');
 	
@@ -691,87 +721,127 @@ License: GPL2
 <?php
 	}
 	
+	add_shortcode( 'gp-integration-translator-list', 'gp_integration_translator_list_shortcode' );
+	
+	function gp_integration_translator_list_shortcode( $atts ) {
+		GLOBAL $gpdb;
+
+		$table_prefix = gp_integration_get_gp_table_prefix();
+		
+		$project_id = '%';
+		if( is_array( $atts ) ) {
+			$projects = null;
+			if( array_key_exists( 'projectname', $atts ) ) { 
+				$projects = $gpdb->get_results("SELECT * FROM {$table_prefix}projects");
+		
+				foreach( $projects as $key => $value ) {
+					if( $value->name == $atts['projectname'] ) { $project_id = $value->id; }
+				}
+			}
+			
+			if( array_key_exists( 'projectslug', $atts ) ) { 
+				if( $projects == null ) {
+					$projects = $gpdb->get_results("SELECT * FROM {$table_prefix}projects");
+				}
+			
+				foreach( $projects as $key => $value ) {
+					if( $value->slug == $atts['projectslug'] ) { $project_id = $value->id; }
+				}
+			}
+
+			if( array_key_exists( 'projectid', $atts ) ) { 
+				$project_id = (int)$atts['projectid']; 
+			}
+			
+		}
+		
+		wp_enqueue_style( 'dashicons' ); 
+
+		// Grab the locale definitions from GlotPress, if it doesn't exist then use the one included in GP Integration.
+		$locale_file = gp_integration_get_gp_dir() . '/locales/locales.php';
+		if( file_exists( $locale_file ) ) {
+			include_once( gp_integration_get_gp_dir() . '/locales/locales.php' );
+		} else {
+			include_once( dirname( __FILE__ ) . 'includes/locales.php' );
+		}
+		
+		// They're a call so let's create it.
+		$gpl = new GP_Locales;
+		
+		// Setup some variables to use later.
+		$return = '<style type="text/css">.gptl-twitter, .gptl-twitter:focus, .gptl-twitter:hover, .gptl-twitter:link, .gptl-twitter:visited, .gptl-twitter:active { color: #55acee; } .gptl-facebook, .gptl-facebook:focus, .gptl-facebook:hover, .gptl-facebook:link, .gptl-facebook:visited, .gptl-facebook:active { color: #3A5795; }</style><table style="border: 0px;">';
+		$names = array();
+        $links = array();
+		
+		// Grab all of the approvers from the GlotPress permissions table and join it to the WordPress users table so we can get display names later.
+		$result = $gpdb->get_results( "SELECT * FROM {$table_prefix}permissions INNER JOIN `{$gpdb->users}` on `{$table_prefix}permissions`.`user_id` = `{$gpdb->users}`.`ID` WHERE `{$table_prefix}permissions`.`action`='approve' AND `{$table_prefix}permissions`.`object_id` LIKE '{$project_id}|%'" );
+
+		// Loop through all the results from the database and create a list of locales with all their approvers assocaited with them.
+		foreach( $result as $row ) {
+			$details = explode( '|', $row->object_id );
+
+			if( $details === FALSE || !isset( $details[1] ) ) { continue; }
+
+			$current = $gpl->locales[$details[1]];
+			
+			$names[$current->english_name][] = $row->display_name;
+            $links[$row->display_name] = $row->user_url;
+		}
+
+		// Sort the locale list.
+		ksort( $names );
+		
+		// Loop through all the locales to do the output.
+		foreach( $names as $key => $values ) {
+			// Sort the approvers names alphabetically.
+			ksort( $values );
+			
+			foreach( $values as $keynumber => $display_name ) {
+				if( $links[$display_name] ) {
+					$nice_link = parse_url( $links[$display_name], PHP_URL_HOST );
+					$nice_link = str_ireplace( 'www.', '', $nice_link );
+					$nice_link = strtolower( $nice_link );
+					
+					if( strstr( $display_name, $nice_link ) ) { 
+						$nice_link = ''; 
+					} else { 
+						switch( $nice_link ) {
+							case 'twitter.com':
+								$nice_link = ' <span class="dashicons dashicons-twitter gptl-twitter"></span>';
+								
+								break;
+							case 'facebook.com':
+								$nice_link = ' <span class="dashicons dashicons-facebook gptl-facebook"></span>';
+							
+								break;
+							default:
+								$nice_link = ' (' . htmlentities( $nice_link ) . ')'; 
+							
+								break;
+						} 
+					}
+					
+					$values[$keynumber] = '<a href="' . htmlentities( $links[$display_name], ENT_QUOTES ) . '" target="_blank">' . htmlentities( $display_name, ENT_QUOTES ) . $nice_link . '</a>';
+				} else {
+					$values[$keynumber] = htmlentities( $display_name, ENT_QUOTES );
+				}
+			} 
+
+			// Create the return string.
+			$return .= "<tr><td style=\"text-align: right; border: 0px; background: transparent; white-space: nowrap;\">" . htmlentities( $key, ENT_QUOTES ) . ":</td><td style=\"border: 0px; background: transparent; padding-left:5px;\">" . implode( ', ', $values ) . "</td></tr>\r\n";
+		}
+		
+		$return .= '</table>';
+		
+		// Return the value.
+		return $return;
+	}
+
 	/*
-	 	This function generates the Just Writing settings page and handles the actions associated with it.
+	 	This function generates the settings page and handles the actions associated with it.
 	 */
 	function gp_integration_admin_page()
 		{
-		global $gpdb, $gpi_utils;
-
-		$gpi_options = gpi_user_options_array();
-
-		if( array_key_exists( 'gp-integration-options-save', $_POST ) ) {
-			foreach( $gpi_options as $key => $option ) {
-				if( array_key_exists( $key, $_POST ) ) {
-					$setting = esc_html( $_POST[$key] );
-					$gpi_utils->update_option($key, $setting );
-				}
-				else if( $option['type'] == 'bool' ) {
-					$gpi_utils->update_option($key, false);
-				}
-			}
-		}
-
-	?>
-<div class="wrap">
-	<fieldset style="border:1px solid #cecece;padding:15px; margin-top:25px" >
-		<legend><span style="font-size: 24px; font-weight: 700;"><?php _e('GP Integration Options');?></span></legend>
-		<form method="post">
-
-			<table>
-<?php
-				
-				foreach( $gpi_options as $name => $option ) {
-
-					switch( $option['type'] ) {
-						case 'title':
-							echo "					<tr><td colspan=\"2\"><h3>" . __($name) . "</h3></td></tr>\n";
-							
-							break;
-						case 'desc':
-							echo "					<tr><td></td><td><span class=\"description\">" . __($option['desc']) . "</span></td></tr>\n";
-							
-							break;
-						case 'bool':
-							if( $gpi_utils->get_option($name) == true ) { $checked = " CHECKED"; } else { $checked = ""; } 
-							echo "					<tr><td style=\"text-align: right;\">" . __($option['desc']) . ":</td><td><input name=\"$name\" value=\"1\" type=\"checkbox\" id=\"$name\"" . $checked. "></td></tr>\n";
-						
-							break;
-						case 'image':
-							echo "					<tr><td style=\"text-align: right;\">" . __($option['desc']) . ":</td><td><input name=\"$name\" type=\"text\" size=\"40\" id=\"$name\" value=\"" . $gpi_utils->get_option($name) . "\"></td></tr>\n";
-						
-							break;
-						default:
-							if( $option['height'] <= 1 ) {
-								echo "					<tr><td style=\"text-align: right;\">" . __($option['desc']) . ":</td><td><input name=\"$name\" type=\"text\" size=\"{$option['size']}\" id=\"$name\" value=\"" . $gpi_utils->get_option($name) . "\"></td></tr>\n";
-							}
-							else {
-								echo "					<tr><td style=\"text-align: right;\">" . __($option['desc']) . ":</td><td><textarea name=\"$name\" type=\"text\" cols=\"{$option['size']}\" rows=\"{$option['height']}\" id=\"$name\">" . esc_html( $gpi_utils->get_option($name) ) . "</textarea></td></tr>\n";
-							}
-								
-					}
-				}
-
-
-?>
-				</table>
-
-			<div class="submit"><input type="submit" class="button button-primary" name="gp-integration-options-save" value="<?php _e('Update Options') ?>" /></div>
-		</form>
-		
-	</fieldset>
-	
-	<fieldset style="border:1px solid #cecece;padding:15px; margin-top:25px" >
-		<legend><span style="font-size: 24px; font-weight: 700;">&nbsp;<?php _e('About'); ?>&nbsp;</span></legend>
-		<h2><?php echo sprintf( __('GP Integration Version %s'), GP_INTEGRATION_VERSION );?></h2>
-		<p><?php _e('by');?> <a href="https://profiles.wordpress.org/gregross" target=_blank>Greg Ross</a></p>
-		<p>&nbsp;</p>
-		<p><?php printf(__('Licenced under the %sGPL Version 2%s'), '<a href="http://www.gnu.org/licenses/gpl-2.0.html" target=_blank>', '</a>');?></p>
-		<p><?php printf(__('To find out more, please visit the %sWordPress Plugin Directory page%s or the plugin home page on %sToolStack.com%s'), '<a href="http://wordpress.org/plugins/gp-integration" target=_blank>', '</a>', '<a href="http://toolstack.com/gp-integration" target=_blank>', '</a>');?></p>
-		<p>&nbsp;</p>
-		<p><?php printf(__("Don't forget to %srate and review%s it too!"), '<a href="http://wordpress.org/support/view/plugin-reviews/gp-integration" target=_blank>', '</a>');?></p>
-	</fieldset>
-</div>
-	<?php
+		include( dirname( __FILE__ ) . '/includes/page.settings.php' );
 		}
 		

@@ -54,6 +54,7 @@ The GlotPress logo is a PNG, but it doesn't have a transparent background set.  
 
 [gp-integration] will embed GlotPress.
 [gp-integration-link] will create a link to your GlotPress install.
+[gp-integration-translator-list] will create a formated table of your translators.
 
 = How does the shortcode work? =
 
@@ -74,7 +75,7 @@ Also note that external links, like the "Proudly powered by GlotPress" in the fo
 == Changelog ==
 = 1.5 =
 * Release date: October 8, 2015
-* Added gp-integration-translators-list short code.
+* Added gp-integration-translator-list short code.
 * Added translation support.
 * Fixed warning messages during install if GP_DEBUG is enabled.
 * Fixed missing define.
